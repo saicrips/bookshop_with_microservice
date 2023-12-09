@@ -21,6 +21,12 @@ gRPCを利用するためのコマンド
 go get google.golang.org/grpc
 ```
 
+## サーバの実行
+
+```bash
+go run main.go
+```
+
 ## gRPCurlによるgRPCサーバ確認
 
 ### サービスの確認
@@ -32,10 +38,6 @@ grpcurl -plaintext localhost:50051 list
 ```bash
 grpcurl -plaintext localhost:50051 list book.Catalogue
 ```
-
---yes
-
-正野 勇嗣; 山田 真也; 宇都宮 雅彦; 横井 一輝; 岡本 隆史. クラウドネイティブで実現する　マイクロサービス開発・運用 実践ガイド エンジニア選書 (p.108). 株式会社技術評論社. Kindle 版. 
 
 ### GetBookメソッドにリクエスト
 GetBookメソッドにidが1の書籍情報をリクエスト
@@ -55,3 +57,19 @@ grpcurl -plaintext -d '{"id": 1}' localhost:50051 book.Catalogue.GetBook
 }
 ```
 
+## Apollo Serverを使ったBFFの実装
+
+### Node.jsプロジェクトの初期化
+```bash
+npm init --yes
+```
+
+### ライブラリインストール
+```bash
+npm install @apollo/server express graphql cors body-parser
+```
+
+### gRPCのインストール
+```bash
+npm install @grpc/grpc-js @grpc/proto-loader
+```
