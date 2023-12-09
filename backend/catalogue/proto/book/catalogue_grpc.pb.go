@@ -8,6 +8,7 @@ package book
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -23,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CatalogueClient interface {
 	GetBook(ctx context.Context, in *GetBookRequest, opts ...grpc.CallOption) (*GetBookResponse, error)
+	ListBooks(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListBooksResponse, error)
 }
 
 type catalogueClient struct {
@@ -42,11 +44,21 @@ func (c *catalogueClient) GetBook(ctx context.Context, in *GetBookRequest, opts 
 	return out, nil
 }
 
+func (c *catalogueClient) ListBooks(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListBooksResponse, error) {
+	out := new(ListBooksResponse)
+	err := c.cc.Invoke(ctx, "/book.Catalogue/ListBooks", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CatalogueServer is the server API for Catalogue service.
 // All implementations must embed UnimplementedCatalogueServer
 // for forward compatibility
 type CatalogueServer interface {
 	GetBook(context.Context, *GetBookRequest) (*GetBookResponse, error)
+	ListBooks(context.Context, *empty.Empty) (*ListBooksResponse, error)
 	mustEmbedUnimplementedCatalogueServer()
 }
 
@@ -56,6 +68,9 @@ type UnimplementedCatalogueServer struct {
 
 func (UnimplementedCatalogueServer) GetBook(context.Context, *GetBookRequest) (*GetBookResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBook not implemented")
+}
+func (UnimplementedCatalogueServer) ListBooks(context.Context, *empty.Empty) (*ListBooksResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBooks not implemented")
 }
 func (UnimplementedCatalogueServer) mustEmbedUnimplementedCatalogueServer() {}
 
@@ -88,6 +103,24 @@ func _Catalogue_GetBook_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Catalogue_ListBooks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CatalogueServer).ListBooks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/book.Catalogue/ListBooks",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CatalogueServer).ListBooks(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Catalogue_ServiceDesc is the grpc.ServiceDesc for Catalogue service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +131,10 @@ var Catalogue_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetBook",
 			Handler:    _Catalogue_GetBook_Handler,
+		},
+		{
+			MethodName: "ListBooks",
+			Handler:    _Catalogue_ListBooks_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -11,6 +11,8 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // 書籍情報の構造体
@@ -62,6 +64,25 @@ func (s *server) GetBook(ctx context.Context, in *pb.GetBookRequest) (*pb.GetBoo
 
 	// レスポンス用のコードを使ってレスポンスを作り返却
 	return &pb.GetBookResponse{Book: protoBook}, nil
+}
+
+// 自動生成された`catalogue_grpc.pb.go`の`ListBooks`インターフェースを実装。
+func (s *server) ListBooks(ctx context.Context, in *emptypb.Empty) (*pb.ListBooksResponse, error) {
+	// レスポンス用のデータを作成
+	protoBooks := make([]*pb.Book, 0)
+
+	for _, book := range books {
+		protoBook := &pb.Book{
+			Id:     int32(book.Id),
+			Title:  book.Title,
+			Author: book.Author,
+			Price:  int32(book.Price),
+		}
+		protoBooks = append(protoBooks, protoBook)
+	}
+
+	// レスポンス用のコードを使ってレスポンスを作り返却
+	return &pb.ListBooksResponse{Books: protoBooks}, nil
 }
 
 var (
