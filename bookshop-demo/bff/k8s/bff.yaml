@@ -34,9 +34,11 @@ spec:
     spec:
       containers:
       - name: bff
-        image: bookshop/bff:0.1
+        image: registry.gitlab.com/gihyo-ms-dev-book/handson/sec3/3.1-bookshop-sample/bff
         env:
         - name: CATALOGUE_CLIENT_URI
           value: "catalogue:50051"
+        - name: ORDER_CLIENT_URI
+          value: "order:50052"
         ports:
         - containerPort: 4000

@@ -16,7 +16,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: calalogue
+  name: catalogue
   labels:
     app: catalogue
     version: v1
@@ -34,7 +34,9 @@ spec:
     spec:
       containers:
       - name: catalogue
-        image: bookshop/catalogue:0.1
+        image: registry.gitlab.com/gihyo-ms-dev-book/handson/sec3/3.1-bookshop-sample/catalogue
+        env:
+        - name: DATABASE
+          value: "catalogue_user:default_password@tcp(catalogue-db:3306)/booksdb"
         ports:
         - containerPort: 50051
-

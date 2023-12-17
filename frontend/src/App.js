@@ -1,42 +1,18 @@
-import './App.css';
-import { useQuery, gql } from '@apollo/client';
+import ButtonAppBar from './BasicAppBar'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
+import Catalogue from './Catalogue'
 
-const LIST_BOOKS = gql`
-  query ListBooks {
-    books {
-      id
-      title
-      author
-      price
-    }
-  }
-`
-
-
-function App() {
-  const { loading, error, data } = useQuery(LIST_BOOKS)
-
-  if (loading) return 'Loading...'
-  if (error) return `Error! ${error.message}`
+export default function App(props) {
+  const keycloak = props.keycloak
+  const cart = []
 
   return (
-    <div className="App">
-      <table>
-        <tr>
-          <th>書籍名</th>
-          <th>著者</th>
-          <th>価格&nbsp;(円)</th>
-        </tr>
-        {data.books.map((row) => (
-            <tr>
-              <td>{row.title}</td>
-              <td>{row.author}</td>
-              <td align="right">{row.price}</td>
-            </tr>
-          ))}
-      </table>
-    </div>
-  );
+    <Box sx={{ flexGrow: 1 }}>
+      <ButtonAppBar keycloak={keycloak} cart={cart}/>
+      <Container>
+        <Catalogue cart={cart}/>
+      </Container>
+    </Box>
+  )
 }
-
-export default App;

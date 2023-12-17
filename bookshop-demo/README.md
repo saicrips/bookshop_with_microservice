@@ -83,3 +83,46 @@ kubectl port-forward service/bff 4000:4000
 ```bash
 kubectl port-forward service/catalogue 50051:50051
 ```
+
+# セットアップ その2
+
+## 事前準備
+
+kindは一度作成したクラスタをあとからポート開放できないので、
+すでにクラスタが作成されていたら一度削除しておく
+
+```bash
+kind delete cluster
+```
+
+configファイルを使用してkindクラスタを作成する
+
+```bash
+kind create cluster --config common/kind/kind-config.yaml
+```
+
+## Book Shopのデプロイ
+
+```bash
+./scripts/deploy_all.sh
+```
+
+デプロイされることを確認
+
+```bash
+kubectl get pod
+```
+
+```bash
+kubectl get service
+```
+
+## Book Shopの動作確認
+
+```bash
+kubectl port-forward service/frontend 8080:80
+```
+
+```bash
+kubectl port-forward service/bff 4000:4000
+```

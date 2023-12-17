@@ -34,6 +34,6 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: bookshop/frontend:0.1
+        image: registry.gitlab.com/gihyo-ms-dev-book/handson/sec3/3.1-bookshop-sample/frontend
         ports:
         - containerPort: 80
