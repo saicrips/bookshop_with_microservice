@@ -3,14 +3,14 @@ kind: DestinationRule
 metadata:
   name: frontend
 spec:
-  host: frontend.default.svc.cluster.local
+  host: frontend
   trafficPolicy:
     loadBalancer:
-      simple: ROUND_ROBIN
+      simple: ROUND_ROBIN # ラウンドロビンで負荷分散
   subsets:
-  - name: v1
-    labels:
+  - name: v1      # サブセットv1
+    labels:       # version=v1というラベルを持つPodにルーティング
       version: v1
-  - name: v2
-    labels:
+  - name: v2      # サブセットv2
+    labels:       # version=v2というラベルを持つPodにルーティング
       version: v2

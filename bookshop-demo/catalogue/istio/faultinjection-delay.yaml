@@ -9,4 +9,7 @@ spec:
   - route:
     - destination:
         host: catalogue
-        subset: v1
+    fault:
+      delay:  # 100%の確率で2秒間の遅延
+        percent: 100
+        fixedDelay: 2s  

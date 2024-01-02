@@ -13,7 +13,7 @@ spec:
               port: 15021
               targetPort: 15021
             - name: http2
-              nodePort: 30080
+              nodePort: 30080           # NodePortを30080に設定する。
               port: 80
               targetPort: 8080
             - name: https

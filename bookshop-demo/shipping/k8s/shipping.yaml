@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: shipping
-        image: registry.gitlab.com/gihyo-ms-dev-book/handson/sec3/3.1-bookshop-sample/shipping
+        image: registry.gitlab.com/gihyo-ms-dev-book/handson/sec3/3.4-auth/shipping
         env:
         - name: RABBITMQ
           value: "amqp://guest:guest@rabbitmq:5672/"

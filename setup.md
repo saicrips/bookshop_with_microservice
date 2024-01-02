@@ -372,3 +372,167 @@ go get github.com/rabbitmq/amqp091-go
 $ go run main.go
 2023/12/17 11:44:36 Received a message: {"ID":"test_id","CustomerId":"test","CustomerName":"customer name","OrderItem":[]}
 ```
+
+# Istioセットアップ
+
+## Istioのインストール
+
+```bash
+istioctl install --set profile=demo -f common/istio/ingressgateway_NodePort.yaml -y
+```
+
+Istioの動作確認
+```bash
+kubectl get service -n istio-system
+```
+
+## アプリのデプロイ
+
+```bash
+./scripts/deploy_all.sh
+```
+
+defaultのnamespaceにラベルを付与し、namespace内で新しくデプロイされるアプリケーションに自動でサイドカープロキシを挿入する。
+```bash
+kubectl label namespace default istio-injection=enabled
+```
+
+デプロイしたアプリを一度削除し、サイドカープロキシを挿入できるようにする
+```bash
+./scripts/delete_all.sh
+```
+```bash
+./scripts/deploy_all.sh
+```
+
+## Gatewayの登録
+
+設定の適用
+```bash
+kubectl apply -f common/istio/ingress-gateway.yaml 
+kubectl apply -f bff/istio/virtualservice.yaml
+kubectl apply -f frontend/istio/virtualservice.yaml
+```
+
+## ルーティング制御
+
+ルーティング制御の機能を試すため、フロントエンドの2つのバージョンをデプロイする(何回か更新するといずれかのバージョンが見れる)
+
+```bash
+kubectl delete deployment frontend
+kubectl apply -f frontend/k8s/frontend-v1.yaml 
+kubectl apply -f frontend/k8s/frontend-v2.yaml
+```
+
+ラウンドロビン方式による振り分け(交互に変わる)
+
+```bash
+kubectl apply -f frontend/istio/destinationrule.yaml
+```
+
+トラフィックをv1に75%, v2に25%の割合でルーティングする
+
+```bash
+kubectl apply -f frontend/istio/virtualservice-25-v2.yaml
+```
+
+## タイムアウト
+
+意図的にカタログサービスで2秒間の遅延を発生させる
+
+```bash
+kubectl apply -f catalogue/istio/virtualservice-delay.yaml
+```
+
+0.5秒の遅延が発生するとタイムアウトとする
+```bash
+kubectl apply -f bff/istio/virtualservice-timeout.yaml
+```
+
+カタログサービスの遅延解除
+```bash
+kubectl delete -f catalogue/istio/virtualservice-delay.yaml
+```
+
+## サーキットブレーカー
+
+サーキットブレーカーの適用
+```bash
+kubectl apply -f catalogue/istio/destinationrule-cb.yaml
+```
+
+意図的にカタログサービスに障害を発生させる
+```bash
+kubectl scale deployments catalogue-db --replicas=0
+```
+
+ブラウザに1回だけアクセスすると出てくるエラー
+```
+Error! 2 UNKNOWN: driver: bad connection
+```
+
+ブラウザにさらに3回以上アクセスすると出てくるエラー
+```
+Error! 14 UNAVAILABLE: no healthy upstream
+```
+
+# サービス間の通信セキュリティ
+
+## TLS通信のみに制限する
+
+「STRINCT」(デフォルトだと「PERMISSIVE」)モードにすると相互TLSトラフィックのみを許可する
+
+```bash
+kubectl apply -f common/istio/peer-authentication-mtls.yaml
+```
+
+## JWT検証
+
+Ingress Gatewayに対してRequest Authenticationを設定
+```bash
+kubectl apply -f common/istio/request-authentication-keycloak.yaml
+```
+
+## 認可制御
+
+AythorizationPolicyを使用した認可設定
+```bash
+kubectl apply -f common/istio/authorization-policy-keycloak.yaml
+```
+
+# 認証・認可
+
+## 認証・認可の実装
+
+1. KeyCloakのデプロイ
+
+  1. KeyCloakの起動
+
+bookshop-demoディレクトリに移動
+```bash
+kubectl apply -f auth/k8s/keycloak.yaml
+```
+
+起動の確認
+```bash
+kubectl get pod -n keycloak
+```
+
+  2. Realmの作成
+
+  `localhost:8080/admin`にアクセス
+
+  3. ユーザの作成
+
+  4. アプリケーションのクライアントを登録
+
+2. フロントエンドと認証サーバの連携
+
+フロントエンドサーバに移動
+```bash
+npm i keycloak-js
+```
+
+3. 動作確認
+
+localhostにアクセスすると

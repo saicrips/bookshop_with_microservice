@@ -8,7 +8,7 @@ spec:
     outlierDetection:
       consecutive5xxErrors: 3
       interval: 10s
-      baseEjectionTime: 30s
+      baseEjectionTime: 60s
   subsets:
   - name: v1
     labels:

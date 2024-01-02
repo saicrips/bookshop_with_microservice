@@ -27,7 +27,7 @@ func NewOrderRepository(client *mongo.Client) repository.OrderRepository {
 
 func (o *OrderRepository) ListOrders(ctx context.Context, customerId string) ([]*model.Order, error) {
 	coll := o.client.Database(DATABASE).Collection(COLLECTION)
-	filter := bson.D{{Key: "customerId", Value: customerId}}
+	filter := bson.D{{Key: "customerId", Value : customerId}}
 
 	cursor, err := coll.Find(context.TODO(), filter)
 	if err != nil {

@@ -7,11 +7,14 @@ spec:
   selector:
     matchLabels:
       istio: ingressgateway
-  action: DENY
+  action: ALLOW
   rules:
-  - from:
-    - source:
-        notRequestPrincipals: ["*"]
-    to:
+  - to:
     - operation:
-        paths: ["/bff"]
+        notPaths: ["/bff/*"]
+  - to:
+    - operation:
+        paths: ["/bff/*"]
+    when:
+    - key: request.auth.principal
+      values: ["*"]

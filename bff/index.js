@@ -8,6 +8,8 @@ import { typeDefs } from './schema.js'
 import { resolvers } from './resolver.js'
 import { CatalogueDataSource }  from './datasource/catalogue.js' 
 import { OrderDataSource }  from './datasource/order.js' 
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+
 
 // Expressサーバとの統合
 const app = express();
@@ -20,6 +22,7 @@ const httpServer = http.createServer(app);
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
 });
 
 // ApolloServerの起動
@@ -42,6 +45,10 @@ app.use(
   }),
 );
 
-app.listen(4000)
+await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
 
 console.log(`🚀 Server ready at http://localhost:4000/`);
+
+app.get('/health', (req, res) => {
+  res.status(200).send('Okay!');
+});
